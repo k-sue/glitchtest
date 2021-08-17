@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <title>チーム作成ツール</title>
+</head>
+<body>
+  <div id="app">
+    <v-app>
+      <v-main>
+        <v-container>
+            <v-row>
+                <v-col class="text-h4 font-weight-black pb-10">
+                    チーム作成ツール
+                </v-col>
+            </v-row>
+            <v-form v-model="valid" ref="form" lazy-validation>
+            	チームの人数を選択してください。
+                <v-select
+                v-model="member"
+                item-text="label"
+                item-value="value"
+                :items="items"
+                outlined
+                required
+                label="チーム人数"
+                return-object
+                :rules="[v => !!v || '人数を選択してください']"
+                > </v-select>
+                参加者を1行に1人入力してチーム作成ボタンを押してください。
+                <div id="player_count"></div>
+                <v-textarea
+                    id="datalist" 
+                    name="input-7-1"
+                    label="参加者"
+                    value=""
+                    outlined
+                    required
+                    rows=16
+                    @input="inputChange()"
+                    clearable
+                ></v-textarea>
+                <v-btn color="primary" :disabled="!valid" @click="listedit()">
+                    チーム作成
+                </v-btn>
+            </v-form>
+            <div id="result_title" class="py-4 text-h5 light-blue--text font-weight-bold text-decoration-underline">
+            </div>  
+            <div id="result"></div> 
+        </v-container>
+      </v-main>
+    </v-app>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script>
+    new Vue({
+        el: '#app',
+        vuetify: new Vuetify(),
+
+        data: () => ({
+
+            valid:true,
+            member:null,
+
+            items: [
+            { label: '2' , value: '2'   },
+            { label: '3' , value: '3'   },
+            { label: '4' , value: '4'   },
+            { label: '5' , value: '5'   },
+            { label: '6' , value: '6'   },
+            { label: '7' , value: '7'   },
+            { label: '8' , value: '8'   },
+            ],
+            
+            memberRules: [
+            v => !!v || '選択してください',
+            ],
+    
+        }),
+
+        methods: {
+
+            // テキストエリアの中身を取得するメソッド
+            getTextareaData(){
+
+                // 出場の中身取得
+                sdata = document.getElementById("datalist").value;
+                
+                // 出場の中身を1行ずつ配列に入れるための配列用意
+                arry_data = new Array();
+                sdata.trim()
+
+                // 出場の中身を行で分割して配列に入れる
+                arry = sdata.split("\n");
+
+                // ""の配列を削除する
+                var arry_data = arry.filter(Boolean);
+
+                return arry_data;
+
+            },
+
+            // 出場者数を表示するメソッド
+            inputChange(){
+
+                // テキストエリアの中身を取得するメソッドを呼び出す
+                var arry_data = this.getTextareaData();
+
+                // 出場者数（テキストエリアの行数）を表示する
+                player_count.innerHTML = "&emsp;参加者数：" + arry_data.length;
+
+                // console.log(arry_data.length);
+
+            },
+
+            // チーム決めメソッド
+            listedit(){
+
+                // 入力チェックを実行
+                this.$refs.form.validate()
+
+                // テキストエリアの中身を取得するメソッドを呼び出す
+                var arry_data = this.getTextareaData();
+
+                // console.log(arry_data);
+
+                // チームを入れる配列を用意
+                arry_team = new Array();
+                
+                // セレクトボックスで選択した数字を取得する
+                const str = this.member.value;
+
+                // チームメンバーがいなかったときの画面の表示に使用
+                var nothingplayer = "";
+                
+                // チーム分け処理
+                for(x=0; arry_data.length !== 0; x++){
+
+                    // チームのメンバーを入れるための変数を用意
+                    var liststr = "";
+
+                    // セレクトボックスで選択した数字（チームの人数）繰り返す
+                    for(let i = 0; i < str; ++i){
+
+                        // 確認用
+                        // console.log(arry_data[i]);
+
+                        // 配列からランダムに取得するためにランダムの数を生成
+                        var random_num = Math.floor( Math.random() * arry_data.length );
+
+                        // 出場の中身が入った配列がチーム人数よりも少ない場合
+                        if(arry_data.length === 0){ 
+                        
+                            // NothingPyalerと表示させる
+                            liststr += "," + nothingplayer;
+                                
+                        }else{
+                        //　出場の中身が入った配列が空でない場合 
+
+                            // 最初のチームメンバーの場合
+                            if(liststr == ""){
+
+                                // チームメンバーを入れる変数に配列からランダムに取得したメンバーを入れる
+                                liststr += arry_data[random_num];
+
+                            }else{
+                            // チームメンバーが二人目以降の場合
+
+                                // カンマ区切りでチームメンバーを入れる変数に配列からランダムに取得したメンバーを入れる
+                                liststr += "," + arry_data[random_num];
+
+                            }
+                        }
+
+                        // チームメンバーを入れる配列を初期化
+                        arry_team[x] = new Array();
+
+                        // 変数liststrはカンマ区切りでチームメンバーが入っているため、
+                        // 分割して配列にチームメンバーを入れなおす
+                        arry_team[x] = liststr.split(",");
+
+                        // 出場の中身が入った配列からは削除する
+                        arry_data.splice(random_num, 1);
+
+                    }
+                }
+
+                // 確認用　チームの配列の中身を出力する
+                // console.log(arry_team);
+
+                // チームメンバーを画面に出力する用意する
+                resultstr = "結果"; 
+                        
+                // 「結果」を表示させる
+                result_title.innerHTML = resultstr;
+
+                fmstr = "";
+
+                row = "<v-row>";
+                endrow = "</v-row>";
+                cols = "<v-col class=" + '"' + "pl-6" + '"' + "cols=12>";
+                endcols = "</v-col>";
+                teamcols = "<v-col class=" + '"' + "text-h6 font-weight-black pt-7" + '"' + ">";
+
+                // チームの数字用変数
+                num = 1;
+
+                // チーム数繰り返す
+                for(let i = 0; i < arry_team.length; ++i){
+                    
+                    fmstr += row + teamcols + "チーム" + num + endcols + "</br>";
+
+                    // fmstr += "<p class = " + " '" + "text-h6 font-weight-black" + "'" + ">チーム" + num+ "</p>";
+
+                    // チーム人数分繰り返す
+                    for(let x = 0; x < arry_team[i].length; ++x){
+
+                        // チームメンバーを結合する
+                        fmstr += cols + arry_team[i][x] + endcols + "</br>";      
+
+                    }
+
+                    // 罫線を結合する
+                    fmstr += endrow + "<hr>";
+
+                    // 結果を表示させる
+                    result.innerHTML = fmstr ;
+
+                    // チームの数字を加算する
+                    num ++;
+              
+                }
+            }
+        },
+    })
+  </script>
+</body>
+</html>
